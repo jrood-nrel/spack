@@ -27,18 +27,19 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
     version(
         "2.2.2", tag="v2.2.2", commit="6e98cb004e5cc2dcb60d09b155182a7095007c8e", submodules=True
     )
-    version(
-        "2.2.1", tag="v2.2.1", commit="ffa9de729df2a11b5241fdeb7628e7fab9f48f9b", submodules=True
-    )
-    version(
-        "2.2.0", tag="v2.2.0", commit="a530903dd9fd67df2528e990ca496f64d45e5e20", submodules=True
-    )
-    version(
-        "2.1.0", tag="v2.1.0", commit="9242f8b766379465ee325a9cbcdcd7f2398d4eef", submodules=True
-    )
-    version(
-        "2.0.0", tag="v2.0.0", commit="dd115634489a736f48593f10be7ac2c992b16088", submodules=True
-    )
+    with default_args(deprecated=True):
+        version(
+            "2.2.1", tag="v2.2.1", commit="ffa9de729df2a11b5241fdeb7628e7fab9f48f9b", submodules=True
+        )
+        version(
+            "2.2.0", tag="v2.2.0", commit="a530903dd9fd67df2528e990ca496f64d45e5e20", submodules=True
+        )
+        version(
+            "2.1.0", tag="v2.1.0", commit="9242f8b766379465ee325a9cbcdcd7f2398d4eef", submodules=True
+        )
+        version(
+            "2.0.0", tag="v2.0.0", commit="dd115634489a736f48593f10be7ac2c992b16088", submodules=True
+        )
 
     variant("pic", default=True, description="Position independent code")
     variant(
@@ -74,28 +75,24 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
 
     depends_on("mpi")
     depends_on("yaml-cpp@0.6.0:0.7.0")
-    depends_on("openfast@4.0.2:+cxx+netcdf", when="+openfast")
-    depends_on("trilinos@15.1.1", when="@=2.1.0")
-    depends_on("trilinos@13.4.1", when="@=2.0.0")
-    depends_on("hypre@2.29.0:", when="@2.0.0:+hypre")
+    depends_on("openfast@4.0.4:+cxx+netcdf", when="+openfast")
+    depends_on("trilinos@16.1.0", when="@2.2.2:")
     depends_on(
-        "trilinos@13:+exodus+tpetra+zoltan+stk~superlu-dist~superlu+hdf5+shards~hypre+gtest "
+        "trilinos+exodus+tpetra+zoltan+stk~superlu-dist~superlu+hdf5+shards~hypre+gtest "
         "gotype=long cxxstd=17"
     )
     depends_on("trilinos~cuda~wrapper", when="~cuda")
-    depends_on("tioga@1.0.0:", when="+tioga")
-    depends_on("hypre@2.18.2: ~int64+mpi~superlu-dist", when="+hypre")
+    depends_on("trilinos~shared", when="+trilinos-solvers")
+    depends_on("tioga", when="+tioga")
+    depends_on("hypre@2.30.0:~int64+mpi~superlu-dist", when="+hypre")
     depends_on("trilinos+muelu+belos+amesos2+ifpack2", when="+trilinos-solvers")
     depends_on("kokkos-nvcc-wrapper", type="build", when="+cuda")
     depends_on("trilinos-catalyst-ioss-adapter", when="+catalyst")
     depends_on("fftw+mpi", when="+fftw")
     depends_on("nccmp")
-    depends_on("boost +filesystem +iostreams cxxstd=14", when="+boost")
+    depends_on("boost+filesystem+iostreams cxxstd=14", when="+boost")
     depends_on("hypre+gpu-aware-mpi", when="+gpu-aware-mpi")
     depends_on("hypre+umpire", when="+umpire")
-    depends_on("trilinos~shared", when="+trilinos-solvers")
-    # indirect dependency needed to make original concretizer work
-    depends_on("netcdf-c+parallel-netcdf")
 
     for _arch in CudaPackage.cuda_arch_values:
         depends_on(
@@ -103,7 +100,7 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
             when="+cuda cuda_arch={0}".format(_arch),
         )
         depends_on(
-            "hypre@2.30.0: +cuda cuda_arch={0}".format(_arch),
+            "hypre+cuda cuda_arch={0}".format(_arch),
             when="+hypre+cuda cuda_arch={0}".format(_arch),
         )
     for _arch in ROCmPackage.amdgpu_targets:
@@ -112,7 +109,7 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
             when="+rocm amdgpu_target={0}".format(_arch),
         )
         depends_on(
-            "hypre@2.30.0: +rocm amdgpu_target={0}".format(_arch),
+            "hypre+rocm amdgpu_target={0}".format(_arch),
             when="+hypre+rocm amdgpu_target={0}".format(_arch),
         )
 
@@ -139,7 +136,7 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("^trilinos+rocm", when="~rocm")
     conflicts("+shared", when="+trilinos-solvers")
     conflicts(
-        "openfast@4.0.0:4.0.1", msg="OpenFAST 4.0.0:4.0.1 contains a bug. Use OpenFAST >= 4.0.2."
+        "openfast@4.0.0:4.0.3", msg="OpenFAST 4.0.0:4.0.3 contains a bug. Use OpenFAST >= 4.0.4."
     )
 
     def setup_dependent_run_environment(

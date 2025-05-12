@@ -62,20 +62,17 @@ class Exawind(CMakePackage, CudaPackage, ROCmPackage):
             when="+nalu_wind_gpu+rocm amdgpu_target=%s" % arch,
         )
 
+    depends_on("mpi")
     depends_on("nalu-wind+hypre+openfast+tioga")
     depends_on("amr-wind+netcdf+mpi+tiny_profile")
+    depends_on("tioga~nodegid")
+    depends_on("openfast+cxx")
     depends_on("trilinos")
     depends_on("yaml-cpp@0.6:")
-    depends_on("tioga~nodegid")
-    depends_on("openfast+cxx@2.6.0:")
     depends_on("amr-wind+sycl", when="+amr_wind_gpu+sycl")
     depends_on("kokkos-nvcc-wrapper", type="build", when="+cuda")
-    depends_on("mpi")
     depends_on("nalu-wind+gpu-aware-mpi", when="+gpu-aware-mpi")
     depends_on("amr-wind+gpu-aware-mpi", when="+gpu-aware-mpi")
-    depends_on("nalu-wind@2.0.0:", when="@1.0.0:")
-    depends_on("amr-wind@0.9.0:", when="@1.0.0:")
-    depends_on("tioga@1.0.0:", when="@1.0.0:")
 
     with when("~amr_wind_gpu~nalu_wind_gpu"):
         conflicts("+cuda")
